@@ -1,6 +1,6 @@
 # This is the Mayan FPL data structure
 
-positions = ("Goalkeeper", "Defender", "midfielder", "Forward")
+positions = ("Goalkeeper", "Defender", "Midfielder", "Forward")
 
 class mfplPlayer:
     def __init__(self, fpl_element, fpl_player, fpl_id, mfpl_data):
@@ -34,10 +34,24 @@ class mfplPlayer:
         #print('getting: ' + str(gw) +  ' ' + info + " " + str(game[info]))
         return game[info]
 
+    def get_latest_info(self, rounds, ordered_games, info):
+        r = -1
+        val = 0.0
+        try:
+            for i in range(rounds):
+                val += float(ordered_games[r][info])
+                r = r-1
+        except:
+            print("get_latest_info exception: " + ':' + str(r) + ':' + str(val) + ':' + str(len(ordered_games)))
+
+        return val
+
 
     def calc_stats(self, mfpl_data):
+        ordered_games = []
         for game in self.played_fixtures:
             gw = game['round']
+            ordered_games.append(game)
             # print('vs.:' + str(game['opponent_team']))
             #print('gameweek:' + str(gw) + ' minutes: ' + str(game['minutes']) + ' vs. ' + mfpl_data.teams[game['opponent_team']-1]['name'] + ' points:' + str(self.get_game_info('total_points',game, gw)))
             # print(str(game))
@@ -47,10 +61,23 @@ class mfplPlayer:
                 self.total_points += self.get_game_info('total_points',game, gw)
                 self.goals_scored += self.get_game_info('goals_scored',game, gw)
                 self.goals_conceded += self.get_game_info('goals_conceded',game, gw)
+        rounds_to_lookback = 3
+        round_to_calc = 0
+        if len(ordered_games) >= rounds_to_lookback:
+            self.latest_points = self.get_latest_info(3, ordered_games, 'total_points')
+            self.latest_goals = self.get_latest_info(3, ordered_games, 'goals_scored')
+            self.latest_bps = self.get_latest_info(3, ordered_games, 'bps')
+            self.latest_ict_index = self.get_latest_info(3, ordered_games, 'ict_index')
+        else:
+            self.latest_points = 0
+            self.latest_goals = 0
+            self.latest_bps = 0
+            self.latest_ict_index = 0
+
 
 
     def print_player_stats(self):
         print(self.team + ': ' + self.name + ': ' + self.position + ' ' +
-              'Points:' + str(self.total_points) + ' Minutes: ' + str(self.total_played_min))
+              'Points:' + str(self.total_points) + ' Minutes: ' + str(self.total_played_min)  + ' latest bsp: ' + str(self.latest_bps) + ' latest ict: ' + str(self.latest_ict_index))
 
 
