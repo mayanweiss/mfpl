@@ -98,7 +98,7 @@ class mfplPlayer:
                 self.goals_conceded += self.get_game_info('goals_conceded', game, gw)
 
         # calc the latest stats of the last gw teh team played for this player
-        self.calc_latest_plyer_stats(self.latest_gw)
+        self.calc_latest_player_stats(self.latest_gw)
 
     # prints player and stats
     def print_player_stats(self):
