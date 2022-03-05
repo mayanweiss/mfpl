@@ -103,8 +103,8 @@ if __name__ == '__main__':
     is_load_data_from_fpl = is_load_data_from_fpl()
 
     # get all data loaded to objects
-    mfd = load_fpl_bootstrap_data(is_load_data_from_fpl)  # , True)
-    players = load_fpl_players_data(is_load_data_from_fpl, mfd)  # , True)
+    mfd = load_fpl_bootstrap_data(is_load_data_from_fpl , True)
+    players = load_fpl_players_data(is_load_data_from_fpl, mfd, True)
 
     # run testing logic functions
     players.print_top_latest_bps_players_on_gw(gw_to_test)
