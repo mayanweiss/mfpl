@@ -3,6 +3,8 @@
 import requests
 from venv.mfplPlayer import mfplPlayer
 
+
+
 # URL elements
 fpl_base_url = 'https://fantasy.premierleague.com/api/'
 fpl_player_data_url = 'element-summary/{}/'
@@ -22,6 +24,7 @@ class mfplPlayers:
             player_url = fpl_base_url + fpl_player_data_url.format(player_id)
 
             # retrieve player data from website
+            print(fpl_player['first_name'] + ', ' + fpl_player['second_name'] + ' URL:' + player_url)
             r = requests.get(player_url)
             fpl_element = r.json()
 
@@ -33,18 +36,34 @@ class mfplPlayers:
     #  <latest_stats_games> games before and teh gw points
     def print_top_latest_bps_players_on_gw(self, gw):
         top_players = {}
-        print('Calcing players latest bps for GW:' + str(gw) + '| # of players:' + str(len(self.players_stats)))
+        print('')
+        print('********** Calculating players latest bps for GW:' + str(gw) + '| # of players:' + str(len(self.players_stats)) + ' ********')
+
+        for player in self.players_stats.values():
+            player.calc_latest_player_stats(gw)
+            if player.latest_bps != None and player.latest_bps >= 60:
+                player.print_player_stats()
+
+    def print_top_latest_bps_players_on_gw_table(self, gw):
+        top_players = {}
+        print('Calcing players latest bps for GW (Table):' + str(gw) + '| # of players:' + str(len(self.players_stats)))
+
+        table = [['Team', 'Player', 'Position', 'Latest Points', 'Latest bps', 'Latest ict', 'GW points']]
+
         for player in self.players_stats.values():
             player.calc_latest_player_stats(gw)
             if player.latest_bps != None and player.latest_bps >= 50:
-                player.print_player_stats()
+                table.append(player.get_player_stats_row())
+                
 
+        print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
 
     # find all players with more than 6 points in a game week, and print their stats leading to this gw
     def print_top_players_by_point_on_gw(self, gw):
+        print('')
+        print('********** top players by points for GW:' + str(gw) + ' ******************')
         for player in self.players_stats.values():
-            gw_points = player.get_game_info('total_points',player.ordered_games[gw], gw)
-            if gw_points >= 6:
+            if player.latest_gw_points >= 8:
                 player.print_player_stats()
 
 

@@ -6,6 +6,8 @@ from venv.mfplData import *
 from venv.mfplPlayers import *
 import pickle
 import time
+#import pandas
+#import tabulate
 
 # Files location and names
 data_base_folder = '/Users/mayan/PycharmProjects/mfpl/data/'
@@ -15,7 +17,7 @@ players_data_file = 'players_data.pkl'
 
 
 # the game week we are testing (for now as a constant)
-gw_to_test = 23.0
+gw_to_test = 28.1
 
 
 # decides if we should load new data from website based on checking if this is a new day
@@ -103,12 +105,13 @@ if __name__ == '__main__':
     is_load_data_from_fpl = is_load_data_from_fpl()
 
     # get all data loaded to objects
-    mfd = load_fpl_bootstrap_data(is_load_data_from_fpl , True)
-    players = load_fpl_players_data(is_load_data_from_fpl, mfd, True)
+    mfd = load_fpl_bootstrap_data(is_load_data_from_fpl )
+    players = load_fpl_players_data(is_load_data_from_fpl, mfd) #, True)
 
     # run testing logic functions
+    # players.print_top_latest_bps_players_on_gw_table(gw_to_test)
     players.print_top_latest_bps_players_on_gw(gw_to_test)
-    # players.print_top_players_by_point_on_gw(gw_to_test)
+    players.print_top_players_by_point_on_gw(gw_to_test)
 
     # Done
     print("All Done :)")

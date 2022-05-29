@@ -42,8 +42,8 @@ class mfplPlayer:
 
         # sort the played games
         self.ordered_games_list.reverse()
-        #print('mfpl_player init: ' + str(self.fpl_id) + ' ' + self.name + "| games:" + str(
-        #    len(self.ordered_games)) + ", Team:" + self.team)
+        print('mfpl_player init: ' + str(self.fpl_id) + ' ' + ", Team:" + self.team + '| '+ self.name + "| games:" + str(
+            len(self.ordered_games)))
 
         #
         self.reset_stats()
@@ -104,8 +104,14 @@ class mfplPlayer:
     def print_player_stats(self):
         print(self.team + ': ' + self.name + ': ' + self.position + ' ' + ': ' +
               'Points:' + str(self.total_points) + ' Minutes: ' + str(self.total_played_min) + ' latest bsp: ' + str(
-            self.latest_bps) + ' latest ict: ' + str(self.latest_ict_index) + ' latest points:' + str(self.latest_points))
+            self.latest_bps) + ' latest ict: ' + str(self.latest_ict_index) + ' latest points:' + str(self.latest_points) +
+              ' Last game points:' + str(self.latest_gw_points))
 
+
+    # prints player and stats
+    def get_player_stats_row(self):
+        return [self.team, self.name, self.position, self.total_points, self.latest_bps, self.latest_ict_index,
+                self.latest_points]
 
     # calc lastest stats of a given gw
     def calc_latest_player_stats(self, gwToWatch):
