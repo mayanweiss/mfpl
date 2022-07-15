@@ -100,13 +100,20 @@ class mfplPlayer:
         # calc the latest stats of the last gw teh team played for this player
         self.calc_latest_player_stats(self.latest_gw)
 
+
+
+    # prints player and stats
+    def add_player_to_print_table(self, table):
+        table.append([self.team, self.name, self.position, str(self.total_points), str(self.total_played_min),
+                      str(self.latest_bps), str(self.latest_ict_index), str(self.latest_points),
+                      str(self.latest_gw_points)])
+
     # prints player and stats
     def print_player_stats(self):
         print(self.team + ': ' + self.name + ': ' + self.position + ' ' + ': ' +
               'Points:' + str(self.total_points) + ' Minutes: ' + str(self.total_played_min) + ' latest bsp: ' + str(
             self.latest_bps) + ' latest ict: ' + str(self.latest_ict_index) + ' latest points:' + str(self.latest_points) +
               ' Last game points:' + str(self.latest_gw_points))
-
 
     # prints player and stats
     def get_player_stats_row(self):

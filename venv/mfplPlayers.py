@@ -2,7 +2,7 @@
 
 import requests
 from venv.mfplPlayer import mfplPlayer
-
+from tabulate import tabulate
 
 
 # URL elements
@@ -39,32 +39,50 @@ class mfplPlayers:
         print('')
         print('********** Calculating players latest bps for GW:' + str(gw) + '| # of players:' + str(len(self.players_stats)) + ' ********')
 
+        table = []
+        self.add_player_print_table_header(table)
         for player in self.players_stats.values():
             player.calc_latest_player_stats(gw)
             if player.latest_bps != None and player.latest_bps >= 60:
-                player.print_player_stats()
-
-    def print_top_latest_bps_players_on_gw_table(self, gw):
-        top_players = {}
-        print('Calcing players latest bps for GW (Table):' + str(gw) + '| # of players:' + str(len(self.players_stats)))
-
-        table = [['Team', 'Player', 'Position', 'Latest Points', 'Latest bps', 'Latest ict', 'GW points']]
-
-        for player in self.players_stats.values():
-            player.calc_latest_player_stats(gw)
-            if player.latest_bps != None and player.latest_bps >= 50:
-                table.append(player.get_player_stats_row())
-                
+                #player.print_player_stats()
+                player.add_player_to_print_table(table)
 
         print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+        print("table size:", len(table)-1)
+
+    def add_player_print_table_header(self, table):
+        table.append(["Team", "Player", 'Position', 'Points', 'Minutes', 'Latest bsp', 'Latest ict', 'Latest Points',
+                      'Last Game Points'])
+
+
+#    def print_top_latest_bps_players_on_gw_table(self, gw):
+#        top_players = {}
+#        print('Calcing players latest bps for GW (Table):' + str(gw) + '| # of players:' + str(len(self.players_stats)))
+#
+#        table = [['Team', 'Player', 'Position', 'Latest Points', 'Latest bps', 'Latest ict', 'GW points']]
+#
+#        for player in self.players_stats.values():
+#            player.calc_latest_player_stats(gw)
+#            if player.latest_bps != None and player.latest_bps >= 50:
+#                table.append(player.get_player_stats_row())
+#
+#
+#        print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
 
     # find all players with more than 6 points in a game week, and print their stats leading to this gw
     def print_top_players_by_point_on_gw(self, gw):
         print('')
         print('********** top players by points for GW:' + str(gw) + ' ******************')
+
+        table = []
+        self.add_player_print_table_header(table)
+
         for player in self.players_stats.values():
             if player.latest_gw_points >= 8:
-                player.print_player_stats()
+                #player.print_player_stats()
+                player.add_player_to_print_table(table)
 
+        print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+        print("table size:", len(table)-1)
 
 

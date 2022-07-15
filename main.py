@@ -103,6 +103,7 @@ def get_data_from_file(filename):
 if __name__ == '__main__':
     # is data on files up to date?
     is_load_data_from_fpl = is_load_data_from_fpl()
+    is_load_data_from_fpl = False
 
     # get all data loaded to objects
     mfd = load_fpl_bootstrap_data(is_load_data_from_fpl )
