@@ -2,6 +2,7 @@
 
 import requests
 from venv.mfplPlayer import mfplPlayer
+from venv.mfplPlayer import latest_stats_games
 from tabulate import tabulate
 
 
@@ -36,7 +37,6 @@ class mfplPlayers:
     #  <latest_stats_games> games before and teh gw points
     def print_top_latest_bps_players_on_gw(self, gw):
         top_players = {}
-        print('')
         print('********** Calculating players latest bps for GW:' + str(gw) + '| # of players:' + str(len(self.players_stats)) + ' ********')
 
         table = []
@@ -49,6 +49,9 @@ class mfplPlayers:
 
         print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
         print("table size:", len(table)-1)
+
+
+        return tabulate(table, headers='firstrow', tablefmt='html')
 
     def add_player_print_table_header(self, table):
         table.append(["Team", "Player", 'Position', 'Points', 'Minutes', 'Latest bsp', 'Latest ict', 'Latest Points',
@@ -71,7 +74,6 @@ class mfplPlayers:
 
     # find all players with more than 6 points in a game week, and print their stats leading to this gw
     def print_top_players_by_point_on_gw(self, gw):
-        print('')
         print('********** top players by points for GW:' + str(gw) + ' ******************')
 
         table = []
@@ -84,5 +86,45 @@ class mfplPlayers:
 
         print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
         print("table size:", len(table)-1)
+
+        return tabulate(table, headers='firstrow', tablefmt='html')
+
+
+
+    def print_top_players_bonus_and_bps_trend(self, gw):
+        print('********** top players bonus and bps trend for GW:' + str(gw) + ' ******************')
+
+        table = []
+        self.add_player_bonus_trend_print_table_header(table)
+
+        for player in self.players_stats.values():
+            if player.latest_game_bonus_points > 0:
+                # player.print_player_stats()
+                player.add_player_to_trend_print_table(table)
+
+        print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+        print("table size:", len(table) - 1)
+
+        return tabulate(table, headers='firstrow', tablefmt='html')
+
+
+    def add_player_bonus_trend_print_table_header(self, table):
+        header = ["Team", "Player", 'Position', 'Points', 'Bonus', 'bps']
+        for i in range(latest_stats_games):
+            header.append("points-" + str(i+1))
+        for i in range(latest_stats_games):
+            header.append("bonus-" + str(i+1))
+        for i in range(latest_stats_games):
+            header.append("bps-" + str(i+1))
+
+#        header_str = ""
+#        for i in range(len(header)):
+#            header_str += header[i]
+#            header_str += ", "
+#        print(header_str)
+
+        table.append(header)
+
+
 
 

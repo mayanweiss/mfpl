@@ -63,7 +63,7 @@ class mfplPlayer:
 
     # calc latest stats before a given GW
     # Info - type of data to calc
-    # index - th eindex in ordered_games_list that is the gw we are checking
+    # index - the index in ordered_games_list that is the gw we are checking
     def get_latest_info(self, info, index):
         # reset return value
         val = 0.0
@@ -86,6 +86,28 @@ class mfplPlayer:
 
         return val
 
+    def get_latest_info_table(self, info, index):
+        # reset return value
+        t_val = []
+        #print("get_latest_info_table " + info)
+
+        try:
+            # go over the last <latest_stats_games> team games before the relevant game we're checking
+            for i in range(latest_stats_games):
+                index = index + 1
+                # find next gw to collect stats from
+                gw_id = self.ordered_games_list[index]
+                # print("get_latest_info retrieving:" + self.name + ':' + info + ' gw:' + str(gw_id) + ', index:' + str(index) + " " + str(latest_stats_games) + " " + str(float(self.get_game_info(info, self.ordered_games[gw_id], gw_id))))
+                # add this gw value to returned value
+                t_val.append(float(self.get_game_info(info, self.ordered_games[gw_id], gw_id)))
+        except Exception as e:
+            #print("get_latest_info exception: " + self.name + ': ' + str(index) + ':' + str(gw_id) + ':' + str(val) + ':' + str(
+            #    len(self.ordered_games)) + ' exception: ' + str(e))
+            e
+
+        return t_val
+
+
     # calc overall stats for this player this season
     def calc_stats(self, mfpl_data):
         for game in self.ordered_games.values():
@@ -97,6 +119,7 @@ class mfplPlayer:
                 self.goals_scored += self.get_game_info('goals_scored', game, gw)
                 self.goals_conceded += self.get_game_info('goals_conceded', game, gw)
 
+
         # calc the latest stats of the last gw teh team played for this player
         self.calc_latest_player_stats(self.latest_gw)
 
@@ -106,19 +129,44 @@ class mfplPlayer:
     def add_player_to_print_table(self, table):
         table.append([self.team, self.name, self.position, str(self.total_points), str(self.total_played_min),
                       str(self.latest_bps), str(self.latest_ict_index), str(self.latest_points),
-                      str(self.latest_gw_points)])
+                      str(self.latest_game_gw_points)])
+
+    # prints player and stats
+    def add_player_to_trend_print_table(self, table):
+        row = [self.team, self.name, self.position, str(self.latest_game_gw_points), str(self.latest_game_bonus_points),
+               str(self.latest_game_bps)]
+
+        #print(str(len(self.latest_points_table)),str(len(self.latest_bonus_points_table)), str(len(self.latest_bps_table)))
+        for i in range(len(self.latest_points_table)):
+            row.append(self.latest_points_table[i])
+
+        for i in range(len(self.latest_bonus_points_table)):
+            row.append(self.latest_bonus_points_table[i])
+
+        for i in range(len(self.latest_bps_table)):
+            row.append(self.latest_bps_table[i])
+
+#        row_str = ""
+#        for i in range(len(row)):
+#            row_str += str(row[i])
+#            row_str += ", "
+#        print(row_str)
+
+
+        table.append(row)
 
     # prints player and stats
     def print_player_stats(self):
         print(self.team + ': ' + self.name + ': ' + self.position + ' ' + ': ' +
               'Points:' + str(self.total_points) + ' Minutes: ' + str(self.total_played_min) + ' latest bsp: ' + str(
             self.latest_bps) + ' latest ict: ' + str(self.latest_ict_index) + ' latest points:' + str(self.latest_points) +
-              ' Last game points:' + str(self.latest_gw_points))
+              ' Last game points:' + str(self.latest_game_gw_points))
 
     # prints player and stats
     def get_player_stats_row(self):
         return [self.team, self.name, self.position, self.total_points, self.latest_bps, self.latest_ict_index,
                 self.latest_points]
+
 
     # calc lastest stats of a given gw
     def calc_latest_player_stats(self, gwToWatch):
@@ -140,7 +188,12 @@ class mfplPlayer:
             self.latest_goals = 0
             self.latest_bps = 0
             self.latest_ict_index = 0
-            self.latest_gw_points = 0
+            self.latest_game_gw_points = 0
+            self.latest_game_bonus_points = 0
+            self.latest_game_bps = 0
+            self.latest_bonus_points_table = []
+            self.latest_bps_table = []
+            self.latest_points_table = []
         else:
             # calc latest games stats for each of the below
             #gwToWatch = self.ordered_games_list[index-1]
@@ -149,4 +202,9 @@ class mfplPlayer:
             self.latest_bps = self.get_latest_info('bps', index)
             self.latest_ict_index = self.get_latest_info('ict_index', index)
             # get this GW points (we usually want to compare latest stats with this gw points)
-            self.latest_gw_points = self.get_game_info('total_points', self.ordered_games[self.ordered_games_list[index]], index)
+            self.latest_game_gw_points = self.get_game_info('total_points', self.ordered_games[self.ordered_games_list[index]], index)
+            self.latest_game_bonus_points = self.get_game_info('bonus', self.ordered_games[self.ordered_games_list[index]], index)
+            self.latest_bonus_points_table = self.get_latest_info_table('bonus', index)
+            self.latest_bps_table = self.get_latest_info_table('bps', index)
+            self.latest_points_table = self.get_latest_info_table('total_points', index)
+            self.latest_game_bps = self.get_game_info('bps', self.ordered_games[self.ordered_games_list[index]], index)

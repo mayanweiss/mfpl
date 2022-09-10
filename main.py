@@ -4,10 +4,12 @@ sys.path.append(".")
 
 from venv.mfplData import *
 from venv.mfplPlayers import *
+from flask import Flask, render_template, url_for
 import pickle
 import time
-#import pandas
-#import tabulate
+from html import unescape  # python 3.x
+
+app = Flask(__name__)
 
 # Files location and names
 data_base_folder = '/Users/mayan/PycharmProjects/mfpl/data/'
@@ -21,7 +23,7 @@ gw_to_test = 28.1
 
 
 # decides if we should load new data from website based on checking if this is a new day
-def is_load_data_from_fpl():
+def is_load_data_from_fpl_():
     # print(data_base_folder + time_file)
 
     # read time of last get from fpl website
@@ -101,8 +103,13 @@ def get_data_from_file(filename):
 
 
 if __name__ == '__main__':
+    app.run(degub=True)
+
+@app.route("/")
+@app.route("/home")
+def run():
     # is data on files up to date?
-    is_load_data_from_fpl = is_load_data_from_fpl()
+    is_load_data_from_fpl = is_load_data_from_fpl_()
     is_load_data_from_fpl = False
 
     # get all data loaded to objects
@@ -111,8 +118,14 @@ if __name__ == '__main__':
 
     # run testing logic functions
     # players.print_top_latest_bps_players_on_gw_table(gw_to_test)
-    players.print_top_latest_bps_players_on_gw(gw_to_test)
-    players.print_top_players_by_point_on_gw(gw_to_test)
+    tables = []
+    tables.append(players.print_top_latest_bps_players_on_gw(gw_to_test))
+
+    tables.append(players.print_top_players_by_point_on_gw(gw_to_test))
+
+    tables.append(players.print_top_players_bonus_and_bps_trend(gw_to_test))
+
+    return unescape(render_template('homepage.html', tables=tables))
 
     # Done
     print("All Done :)")
