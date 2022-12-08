@@ -2,24 +2,22 @@
 import sys
 sys.path.append(".")
 
-from venv.mfplData import *
-from venv.mfplPlayers import *
+#from venv.mfplData import *
+#from venv.mfplPlayers import *
+import venv.mfplData as mfplData
+import venv.mfplPlayers as mfplPlayers
+import venv.mfplPlayer as mfplPlayer
 from flask import Flask, render_template, url_for
 import pickle
 import time
 from html import unescape  # python 3.x
+from venv.forms import HeaderForm
+from mfplHelpers import data_base_folder, bootstrap_data_file, time_file, players_data_file
 
+# Flask configurations
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 
-# Files location and names
-data_base_folder = '/Users/mayan/PycharmProjects/mfpl/data/'
-bootstrap_data_file = 'bootstrap_data.pkl'
-time_file = 'time.txt'
-players_data_file = 'players_data.pkl'
-
-
-# the game week we are testing (for now as a constant)
-gw_to_test = 28.1
 
 
 # decides if we should load new data from website based on checking if this is a new day
@@ -52,7 +50,7 @@ def is_load_data_from_fpl_():
 # Load Bootstrap and Fixures data
 def load_fpl_bootstrap_data(load_data_from_fpl, force_update=False):
     # Create empty mfpl data obj
-    mfd = mfplData()
+    mfd = mfplData.mfplData()
 
     # Do we need to load data from FPL website?
     if load_data_from_fpl or force_update:
@@ -73,7 +71,7 @@ def load_fpl_bootstrap_data(load_data_from_fpl, force_update=False):
 # Load players data
 def load_fpl_players_data(load_data_from_fpl, mfd, force_update=False):
     # Create empty players data obj
-    players = mfplPlayers()
+    players = mfplPlayers.mfplPlayers()
 
     # Do we need to load data from FPL website?
     if load_data_from_fpl or force_update:
@@ -102,15 +100,34 @@ def get_data_from_file(filename):
         return pickle.load(inp)
 
 
-if __name__ == '__main__':
-    app.run(degub=True)
+def readForm(form):
+    try:
+        print("Setting latest_stats_games to " +  str(form.lookback.data) + str(form.lookback.meta))
+        mfplPlayer.set_latest_stats_games(form.lookback.data)
+        print("Setting latest_stats_games to " +  str(form.lookback.data))
+    except ValueError:
+        print("Setting latest_stats_games to default 4")
 
-@app.route("/")
-@app.route("/home")
+    try:
+        mfplPlayer.gw_to_test
+        mfplPlayer.set_gw_to_test(form.round.data)
+        print("Setting gw_to_test to " +  str(form.round.data))
+    except ValueError:
+        print("Setting gw_to_test to default 12")
+
+
+
+
+@app.route("/home", methods=['GET', 'POST'])
+@app.route("/", methods=['GET', 'POST'])
 def run():
+    form = HeaderForm()
+    if form.lookback.data != None and form.round.data != None :
+        readForm(form)
+
     # is data on files up to date?
     is_load_data_from_fpl = is_load_data_from_fpl_()
-    is_load_data_from_fpl = False
+    #is_load_data_from_fpl = True
 
     # get all data loaded to objects
     mfd = load_fpl_bootstrap_data(is_load_data_from_fpl )
@@ -119,13 +136,19 @@ def run():
     # run testing logic functions
     # players.print_top_latest_bps_players_on_gw_table(gw_to_test)
     tables = []
-    tables.append(players.print_top_latest_bps_players_on_gw(gw_to_test))
+    tables.append(players.print_top_players_per_game_per_cost(mfplPlayer.gw_to_test))
 
-    tables.append(players.print_top_players_by_point_on_gw(gw_to_test))
+    #tables.append(players.print_top_latest_bps_players_on_gw(gw_to_test))
 
-    tables.append(players.print_top_players_bonus_and_bps_trend(gw_to_test))
+    #tables.append(players.print_top_players_by_point_on_gw(gw_to_test))
 
-    return unescape(render_template('homepage.html', tables=tables))
+    #tables.append(players.print_top_players_bonus_and_bps_trend(gw_to_test))
+
+    return unescape(render_template('homepage.html', tables=tables, form=form))
 
     # Done
     print("All Done :)")
+
+if __name__ == '__main__':
+    app.run(degub=True)
+    #run()

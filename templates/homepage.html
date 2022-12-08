@@ -1,5 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
+      <div class="content-section">
+        <form method="POST" action="">
+            <fieldset class="form-group">
+                <div class="form-group">
+                    {{ form.round.label(class="form-control-label") }}
+                    {{ form.round(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ form.lookback.label(class="form-control-label") }}
+                    {{ form.lookback(class="form-control form-control-lg") }}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+
     {% for table in tables %}
         <article class="table">
             <div class="media-body">
