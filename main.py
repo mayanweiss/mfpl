@@ -30,11 +30,18 @@ def is_load_data_from_fpl_():
     # print(data_base_folder + time_file)
 
     # read time of last get from fpl website
-    f = open(data_base_folder + time_file, 'r')
+    try:
+        f = open(data_base_folder + time_file, 'r')
+    except FileNotFoundError:
+        f = open(data_base_folder + time_file, 'x')
+        f = open(data_base_folder + time_file, 'r')
     time_string = f.readline()
     print('Last data retrieving time from FPL:' + time_string)
     # convert string to time
-    previous_time = time.strptime(time_string, "%a %b %d %H:%M:%S %Y")
+    try:
+        previous_time = time.strptime(time_string, "%a %b %d %H:%M:%S %Y")
+    except ValueError:
+        previous_time = time.gmtime(0)
     f.close()
 
     # Get current time
