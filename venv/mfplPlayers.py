@@ -2,10 +2,9 @@
 
 import requests
 from venv.mfplPlayer import mfplPlayer
-from venv.mfplPlayer import latest_stats_games
 from tabulate import tabulate
 import time
-from mfplHelpers import data_base_folder, csv_output
+from mfplHelpers import data_base_folder, csv_output, improvement_csv_output, get_latest_stats_games
 # Files location and names
 #data_base_folder = '/Users/mayan/PycharmProjects/mfpl/data/'
 #bootstrap_data_file = 'outputTable.csv'
@@ -24,7 +23,6 @@ class mfplPlayers:
 
     # Get every player data from FPL website
     def get_players_data(self, mfpl_data):
-        count = 0
         for fpl_player in mfpl_data.players:
             # build player's url
             player_id = fpl_player['id']
@@ -32,7 +30,7 @@ class mfplPlayers:
 
             try:
                 # retrieve player data from website
-                print(fpl_player['first_name'] + ', ' + fpl_player['second_name'] + ' URL:' + player_url)
+                #print(fpl_player['first_name'] + ', ' + fpl_player['second_name'] + ' URL:' + player_url)
                 r = requests.get(player_url)
                 fpl_element = r.json()
             except Exception as e:
@@ -41,7 +39,7 @@ class mfplPlayers:
 
 
             # Create player data structure and save to dic (key is player ID)
-            self.players_stats[player_id] = mfplPlayer(fpl_element, fpl_player, player_id, mfpl_data)
+            self.players_stats[player_id] = mfplPlayer(fpl_element, fpl_player, player_id, mfpl_data, True)
             #count += 1
             #if count > 9:
             #    time.sleep(10)
@@ -116,11 +114,11 @@ class mfplPlayers:
 
     def add_player_bonus_trend_print_table_header(self, table):
         header = ["Team", "Player", 'Position', 'Points', 'Bonus', 'bps']
-        for i in range(latest_stats_games):
+        for i in range(get_latest_stats_games()):
             header.append("points-" + str(i+1))
-        for i in range(latest_stats_games):
+        for i in range(get_latest_stats_games()):
             header.append("bonus-" + str(i+1))
-        for i in range(latest_stats_games):
+        for i in range(get_latest_stats_games()):
             header.append("bps-" + str(i+1))
 
         table.append(header)
@@ -131,11 +129,14 @@ class mfplPlayers:
         print('********** top players bonus and bps trend for GW:' + str(gw) + ' ******************')
 
         table = []
-
+#        count = 0
         # add to table each player that latest points per game per cost are high or have high latest points
         for player in self.players_stats.values():
+#            count += 1
+#            if count > 10:
+#                break
             player.calc_latest_player_stats(gw)
-            if (player.latest_points_p_game_p_cost > 0.79 and player.latest_points > 10) or player.latest_points > 18:
+            if (player.latest_points_p_game_p_cost > 0.79 and player.latest_points > 8) or player.latest_points > 18:
                 # player.print_player_stats()
                 player.add_player_to_point_p_game_p_cost_print_table(table)
 
@@ -160,6 +161,49 @@ class mfplPlayers:
 
     def add_player_per_game_per_cost_print_table_header(self, table):
         header = ["Team", "Player", 'Position', 'Points', 'Points per game per cost', 'cost', 'Weighted Points', 'Weighted points per game per cost', 'Latest GW points']
+
+        table.insert(0, header)
+
+
+    def improving_players_table(self, gw):
+        print('********** Improving players trend for GW:' + str(gw) + ' ******************')
+
+        table = []
+#        count= 0
+
+        if gw < 5:
+            print('GW too early for improvement insights')
+
+        # add to table each player that latest points per game per cost are high or have high latest points
+        for player in self.players_stats.values():
+#            count += 1
+#            if count > 10:
+#                break
+            player.calc_latest_player_stats(gw)
+            if player.latest_improved_stats > 4 and player.latest_points > 8:
+                # player.print_player_stats()
+                # TODO Below 
+                player.add_player_to_improved_players_print_table(table)
+
+        # Sort table
+        table = sorted(sorted(table, key=lambda x: float(x[4]), reverse=True), key=lambda x: float(x[6]), reverse=True)
+
+        self.add_improving_players_table_header(table)
+
+        # write table to csv file
+        content = tabulate(table, tablefmt="tsv")
+        text_file = open(data_base_folder + improvement_csv_output, "w")
+        text_file.write(content)
+        text_file.close()
+
+        # print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+        print(tabulate(table, headers='firstrow', tablefmt='csv'))
+        print("table size:", len(table) - 1)
+
+        return tabulate(table, headers='firstrow', tablefmt='html')
+
+    def add_improving_players_table_header(self, table):
+        header = ["Team", "Player", 'Position', 'Points', 'Points per game per cost', 'cost', 'improvement Points', 'Latest GW points']
 
         table.insert(0, header)
 

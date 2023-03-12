@@ -12,18 +12,18 @@
                     {{ form.lookback(class="form-control form-control-lg") }}
                 </div>
             </fieldset>
-            <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
-            </div>
+            {{ form.submit(class="btn btn-outline-info") }}
         </form>
     </div>
+
+    <h2>Round {{ round }}, {{ lookback }} rounds back </h2>
 
     {% for table in tables %}
         <article class="table">
             <div class="media-body">
                 <div class="article-metadata">
-                    <h2> Table </H2>
-                    {{ table }}
+                    <h2> {{table[1]}} </H2>
+                    {{ table[0] }}
                 </div>
             </div>
         </article>

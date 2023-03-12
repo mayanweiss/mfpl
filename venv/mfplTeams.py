@@ -2,47 +2,69 @@
 
 import requests
 from venv.mfplTeam import mfplTeam
+from tabulate import tabulate
 
-
-# Fixture:
-# {'code': 2292838, 'event': 3, 'finished': True, 'finished_provisional': True, 'id': 29, 'kickoff_time': '2022-08-20T11:30:00Z',
-# 'minutes': 90, 'provisional_start_time': False, 'started': True, 'team_a': 20, 'team_a_score': 0, 'team_h': 18, 'team_h_score': 1,
-# 'stats': [{'identifier': 'goals_scored', 'a': [], 'h': [{'value': 1, 'element': 427}]},
-# {'identifier': 'assists', 'a': [], 'h': [{'value': 1, 'element': 448}]},
-# {'identifier': 'own_goals', 'a': [], 'h': []},
-# {'identifier': 'penalties_saved', 'a': [], 'h': []},
-# {'identifier': 'penalties_missed', 'a': [], 'h': []},
-# {'identifier': 'yellow_cards', 'a': [{'value': 1, 'element': 487}, {'value': 1, 'element': 516}], 'h': [{'value': 1, 'element': 427}, {'value': 1, 'element': 433}]},
-# {'identifier': 'red_cards', 'a': [], 'h': []},
-# {'identifier': 'saves', 'a': [{'value': 3, 'element': 478}], 'h': [{'value': 3, 'element': 425}]},
-# {'identifier': 'bonus', 'a': [], 'h': [{'value': 3, 'element': 448}, {'value': 2, 'element': 425}, {'value': 1, 'element': 427}]},
-# {'identifier': 'bps', 'a': [{'value': 21, 'element': 480}, {'value': 16, 'element': 484}, {'value': 14, 'element': 478},
-#                           {'value': 13, 'element': 477}, {'value': 13, 'element': 503}, {'value': 12, 'element': 589},
-#                           {'value': 9, 'element': 482}, {'value': 8, 'element': 516}, {'value': 7, 'element': 486},
-#                           {'value': 6, 'element': 483}, {'value': 6, 'element': 579}, {'value': 5, 'element': 479},
-#                           {'value': 4, 'element': 476}, {'value': 4, 'element': 487}, {'value': 4, 'element': 491},
-#                           {'value': 3, 'element': 481}],
-#                        'h': [{'value': 33, 'element': 448}, {'value': 31, 'element': 425}, {'value': 30, 'element': 427},
-#                           {'value': 29, 'element': 445}, {'value': 25, 'element': 430}, {'value': 25, 'element': 432},
-#                           {'value': 25, 'element': 435}, {'value': 20, 'element': 440}, {'value': 12, 'element': 433},
-#                           {'value': 9, 'element': 446}, {'value': 4, 'element': 436}, {'value': 4, 'element': 444},
-#                           {'value': 3, 'element': 454}, {'value': -2, 'element': 428}]}],
-# 'team_h_difficulty': 2, 'team_a_difficulty': 4, 'pulse_id': 74939}
 
 # all Teams
 class mfplTeams:
     def __init__(self):
-        # all players data dictionaries, player id is the key
         self.teams = {}
+        self.mfd = None
+        self.fplTeams = None
+        self.fixtures = None
 
-    def get_teams_data(self, teams, fixtures):
 
-        for team in teams:
-            self.teams[team['id']] = mfplTeam(team)
+    def get_teams_data(self, mfd):
 
-        for fixutre in fixtures:
+        self.mfd = mfd
+
+        self.fplTeams = mfd.teams
+        self.fixtures = mfd.fixtures
+
+        # set teams data in mfpl teams data structure
+        for fplTeam in self.fplTeams:
+            self.teams[fplTeam['id']] = mfplTeam(fplTeam, self.mfd)
+
+        # go over all games in the league and add them (+ stats to finished games) to each team
+        for fixture in self.fixtures:
             self.teams[fixture['team_a']].add_game(fixture)
             self.teams[fixture['team_h']].add_game(fixture)
+
+        # sort each team's games based on order
+        for team in self.teams.values():
+            team.sort_games()
+            team.calc_games()
+
+    def print_teams_table (self, gw):
+        print('********** print league table for GW:' + str(gw) + ' ******************')
+
+        table = []
+
+        for team in self.teams.values():
+            team.add_team_print_table(table)
+
+#        # Sort table
+        table = sorted(sorted(table, key=lambda x: float(x[2]) - float(x[3]), reverse=True), key=lambda x: float(x[1]), reverse=True)
+#        table = sorted(table, key=lambda x: float(x[1]), reverse=True)
+
+        self.add_teams_print_table_header(table)
+
+#        # write table to csv file
+#        content = tabulate(table, tablefmt="tsv")
+#        text_file = open(data_base_folder + csv_output, "w")
+#        text_file.write(content)
+#        text_file.close()
+
+        # print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+        print(tabulate(table, headers='firstrow', tablefmt='csv'))
+        print("table size:", len(table) - 1)
+
+        return tabulate(table, headers='firstrow', tablefmt='html')
+
+    def add_teams_print_table_header(self, table):
+        header = ["Team", 'Points', 'Goals', 'Conceded', 'Home Points', 'Home Goals', 'Home Conceded', 'Away Points', 'Away Goals', 'Away Conceded']
+
+        table.insert(0, header)
 
 
 

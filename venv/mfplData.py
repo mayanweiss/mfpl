@@ -62,3 +62,16 @@ class mfplData:
     def print_teams(self):
         for team in self.teams:
             print(str(team['id']) + ': ' + team['name'] + 'PusleId: ' + str(team['pulse_id']))
+
+# team structure:
+# {'code': 3, 'draw': 0, 'form': None, 'id': 1, 'loss': 0, 'name': 'Arsenal', 'played': 0, 'points': 0, 'position': 0,
+#   'short_name': 'ARS', 'strength': 4, 'team_division': None, 'unavailable': False, 'win': 0,
+#   'strength_overall_home': 1220, 'strength_overall_away': 1270, 'strength_attack_home': 1240,
+#   'strength_attack_away': 1250, 'strength_defence_home': 1200, 'strength_defence_away': 1270, 'pulse_id': 1}
+    def get_team_info_by_id(self, team_id, info):
+        for team in self.teams:
+            if team["id"] == team_id:
+                return team[info]
+
+
+
