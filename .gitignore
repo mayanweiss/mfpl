@@ -1,0 +1,9 @@
+.idea/
+__pycache__/
+data/bootstrap_data.pkl
+data/improvementOutputTable.csv
+data/outputTable.csv
+data/players_data.pkl
+data/time.txt
+venv/__pycache__/
+
