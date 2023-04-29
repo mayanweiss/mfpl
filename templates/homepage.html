@@ -11,6 +11,10 @@
                     {{ form.lookback.label(class="form-control-label") }}
                     {{ form.lookback(class="form-control form-control-lg") }}
                 </div>
+                <div class="form-group">
+                    {{ form.isGetData(class="checkbox") }}
+                    {{ form.isGetData.label(class="form-control-label") }}
+                </div>
             </fieldset>
             {{ form.submit(class="btn btn-outline-info") }}
         </form>
@@ -19,7 +23,7 @@
     <h2>Round {{ round }}, {{ lookback }} rounds back </h2>
 
     {% for table in tables %}
-        <article class="table">
+        <article class="table" style="float: left">
             <div class="media-body">
                 <div class="article-metadata">
                     <h2> {{table[1]}} </H2>

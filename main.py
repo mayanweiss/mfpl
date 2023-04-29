@@ -7,7 +7,8 @@ sys.path.append(".")
 import venv.mfplData as mfplData
 import venv.mfplPlayers as mfplPlayers
 import venv.mfplPlayer as mfplPlayer
-from mfplHelpers import get_latest_stats_games, get_gw_to_test, set_latest_stats_games, set_gw_to_test
+from mfplHelpers import get_latest_stats_games, get_gw_to_test, set_latest_stats_games, set_gw_to_test, \
+                        set_is_get_data, get_is_get_data
 
 from flask import Flask, render_template, url_for
 import pickle
@@ -129,16 +130,23 @@ def readForm(form):
     try:
         print("Setting latest_stats_games to " + str(form.lookback.data))
         set_latest_stats_games(form.lookback.data)
-        print("Set latest_stats_games to " + str(mfplPlayer.get_latest_stats_games()))
+        print("Set latest_stats_games to " + str(get_latest_stats_games()))
     except ValueError:
         print("Setting latest_stats_games to default 4")
 
     try:
         print("Setting gw_to_test to " + str(form.round.data))
         set_gw_to_test(form.round.data)
-        print("Set gw_to_test to " + str(mfplPlayer.get_gw_to_test()))
+        print("Set gw_to_test to " + str(get_gw_to_test()))
     except ValueError:
         print("Setting gw_to_test to default 12")
+
+    try:
+        print("Setting is_get_data to " + str(form.isGetData.data))
+        set_is_get_data(form.isGetData.data)
+        print("Set is_get_data to " + str(get_is_get_data()))
+    except ValueError:
+        print("Setting is_get_data to default False")
 
 
 @app.route("/home", methods=['GET', 'POST'])
@@ -149,25 +157,26 @@ def run():
         readForm(form)
 
     # is data on files up to date?
-    is_load_data_from_fpl = is_load_data_from_fpl_()
+    is_load_data_from_fpl = get_is_get_data()
     #is_load_data_from_fpl = False
 
+    print("get_is_get_data is:" + str(get_is_get_data()))
 
     # get all data loaded to objects
-    mfd = load_fpl_bootstrap_data(is_load_data_from_fpl) #, True)
-    players = load_fpl_players_data(is_load_data_from_fpl, mfd) #, True)
+    mfd = load_fpl_bootstrap_data(is_load_data_from_fpl)
+    players = load_fpl_players_data(is_load_data_from_fpl, mfd)
     # Does NOT load data just extracts it from mfd
     teams = get_fpl_teams_data(mfd)
 
     # run testing logic functions
     # players.print_top_latest_bps_players_on_gw_table(gw_to_test)
     tables = []
+    tables.append([teams.print_teams_table(mfplPlayer.get_gw_to_test()),
+                   "Teams FPL points table"])
     tables.append([players.print_top_players_per_game_per_cost(mfplPlayer.get_gw_to_test()),
                    "Top Players per Game per Cost"])
     tables.append([players.improving_players_table(mfplPlayer.get_gw_to_test()),
                    "Top Improving Players"])
-    tables.append([teams.print_teams_table(mfplPlayer.get_gw_to_test()),
-                   "Teams FPL points table"])
 
     #tables.append(players.print_top_latest_bps_players_on_gw(gw_to_test))
 
@@ -176,6 +185,7 @@ def run():
     #tables.append(players.print_top_players_bonus_and_bps_trend(gw_to_test))
 
     print("is_load_data_from_fpl:" + str(is_load_data_from_fpl))
+    form.isGetData.data = False
     return unescape(render_template('homepage.html', tables=tables, form=form, round = get_gw_to_test(), lookback = get_latest_stats_games() ))
 
     # Done

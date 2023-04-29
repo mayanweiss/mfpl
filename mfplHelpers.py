@@ -25,3 +25,11 @@ def set_latest_stats_games(val):
 def get_latest_stats_games():
     return latest_stats_games
 
+# should we update data from FPL website or not
+is_get_data = False
+def set_is_get_data(val):
+    global is_get_data
+    is_get_data = bool(val)
+def get_is_get_data():
+    return is_get_data
+

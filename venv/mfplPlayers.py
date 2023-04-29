@@ -141,7 +141,8 @@ class mfplPlayers:
                 player.add_player_to_point_p_game_p_cost_print_table(table)
 
         # Sort table
-        table = sorted(sorted(table, key=lambda x: float(x[4]), reverse=True), key=lambda x: float(x[6]), reverse=True)
+        table = sorted(sorted(sorted(table, key=lambda x: float(x[4]), reverse=True), key=lambda x: float(x[6]), reverse=True),
+                       key=lambda x: str(x[2]), reverse=True)
 
 
         self.add_player_per_game_per_cost_print_table_header(table)
@@ -186,7 +187,9 @@ class mfplPlayers:
                 player.add_player_to_improved_players_print_table(table)
 
         # Sort table
-        table = sorted(sorted(table, key=lambda x: float(x[4]), reverse=True), key=lambda x: float(x[6]), reverse=True)
+        table = sorted(sorted(sorted(table, key=lambda x: float(x[4]), reverse=True), key=lambda x: float(x[6]), reverse=True),
+                       key=lambda x: str(x[2]), reverse=True)
+
 
         self.add_improving_players_table_header(table)
 
