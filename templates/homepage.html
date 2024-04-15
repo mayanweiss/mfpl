@@ -23,12 +23,10 @@
     <h2>Round {{ round }}, {{ lookback }} rounds back </h2>
 
     {% for table in tables %}
-        <article class="table" style="float: left">
-            <div class="media-body">
-                <div class="article-metadata">
-                    <h2> {{table[1]}} </H2>
-                    {{ table[0] }}
-                </div>
+        <article class="table">
+            <div class="article-metadata">
+                <h2> {{table[1]}} </H2>
+                {{ table[0] }}
             </div>
         </article>
     {% endfor %}

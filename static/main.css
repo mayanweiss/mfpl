@@ -78,3 +78,7 @@ a.article-title:hover {
 .account-heading {
   font-size: 2.5rem;
 }
+
+.floatLeft {width: 40%; float: left; }
+.floatRight {width: 30%; float: right; }
+.container { overflow: hidden; }

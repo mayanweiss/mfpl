@@ -9,7 +9,7 @@ improvement_csv_output = 'improvementOutputTable.csv'
 
 
 # the game week we are testing (for now as a constant)
-gw_to_test = 12
+gw_to_test = 1
 def set_gw_to_test(val):
     global gw_to_test
     gw_to_test = int(val)
@@ -18,7 +18,7 @@ def get_gw_to_test():
     return gw_to_test
 
 # How many weeks to look back when calculating stats
-latest_stats_games = 4
+latest_stats_games = 1
 def set_latest_stats_games(val):
     global latest_stats_games
     latest_stats_games = int(val)
