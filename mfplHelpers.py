@@ -1,4 +1,6 @@
 # Files location and names
+import os
+
 data_base_folder = './data/'
 bootstrap_data_file = 'bootstrap_data.pkl'
 time_file = 'time.txt'

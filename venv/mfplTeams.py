@@ -3,6 +3,7 @@
 import requests
 from venv.mfplTeam import mfplTeam
 from tabulate import tabulate
+import os
 
 
 # all Teams
@@ -51,7 +52,7 @@ class mfplTeams:
 
 #        # write table to csv file
 #        content = tabulate(table, tablefmt="tsv")
-#        text_file = open(data_base_folder + csv_output, "w")
+#        text_file = open(os.path.join(data_base_folder, csv_output), "w")
 #        text_file.write(content)
 #        text_file.close()
 

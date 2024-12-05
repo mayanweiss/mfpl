@@ -4,6 +4,7 @@ import requests
 from venv.mfplPlayer import mfplPlayer
 from tabulate import tabulate
 import time
+import os
 from mfplHelpers import data_base_folder, csv_output, improvement_csv_output, get_latest_stats_games
 # Files location and names
 #data_base_folder = '/Users/mayan/PycharmProjects/mfpl/data/'
@@ -149,8 +150,11 @@ class mfplPlayers:
 
         # write table to csv file
         content = tabulate(table, tablefmt="tsv")
-        text_file = open(data_base_folder + csv_output, "w")
-        text_file.write(content)
+        with open(os.path.join(data_base_folder, csv_output), "w", encoding="utf-8") as text_file:
+            text_file.write(content)
+
+        #        text_file = open(os.path.join(data_base_folder, csv_output), "w")
+        #        text_file.write(content)
         text_file.close()
 
 
@@ -195,8 +199,11 @@ class mfplPlayers:
 
         # write table to csv file
         content = tabulate(table, tablefmt="tsv")
-        text_file = open(data_base_folder + improvement_csv_output, "w")
-        text_file.write(content)
+        with open(os.path.join(data_base_folder, csv_output), "w", encoding="utf-8") as text_file:
+            text_file.write(content)
+
+        #        text_file = open(os.path.join(data_base_folder, improvement_csv_output), "w")
+        #        text_file.write(content)
         text_file.close()
 
         # print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))

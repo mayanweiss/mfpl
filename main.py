@@ -29,13 +29,13 @@ app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 # decides if we should load new data from website based on checking if this is a new day
 def is_load_data_from_fpl_():
     # print(data_base_folder + time_file)
-
+    time_f = os.path.join(data_base_folder, time_file)
     # read time of last get from fpl website
     try:
-        f = open(data_base_folder + time_file, 'r')
+        f = open(time_f, 'r')
     except FileNotFoundError:
-        f = open(data_base_folder + time_file, 'x')
-        f = open(data_base_folder + time_file, 'r')
+        f = open(time_f, 'x')
+        f = open(time_f, 'r')
     time_string = f.readline()
     print('Last data retrieving time from FPL:' + time_string)
     # convert string to time
@@ -54,7 +54,7 @@ def is_load_data_from_fpl_():
         return False
     else:
         # update time file to current time
-        f = open(data_base_folder + time_file, 'w')
+        f = open(time_f, 'w')
         f.write(time.asctime())
         f.close()
         return True
