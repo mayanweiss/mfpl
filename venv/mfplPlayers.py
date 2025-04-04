@@ -24,6 +24,7 @@ class mfplPlayers:
 
     # Get every player data from FPL website
     def get_players_data(self, mfpl_data):
+        counter = 0
         for fpl_player in mfpl_data.players:
             # build player's url
             player_id = fpl_player['id']
@@ -37,10 +38,14 @@ class mfplPlayers:
             except Exception as e:
                 print('get_players_data exception caught:' + str(e))
                 time.sleep(60)
-
+            counter += 1
+            if counter % 5 == 0:
+                print('sleeping for 10 seconds, counter:', counter)
+                time.sleep(10)
 
             # Create player data structure and save to dic (key is player ID)
-            self.players_stats[player_id] = mfplPlayer(fpl_element, fpl_player, player_id, mfpl_data, True)
+            self.players_stats[player_id] = mfplPlayer(fpl_element, fpl_player, player_id, mfpl_data, 
+                                                       is_print = True, counter = counter)
             #count += 1
             #if count > 9:
             #    time.sleep(10)
@@ -199,6 +204,7 @@ class mfplPlayers:
 
         # write table to csv file
         content = tabulate(table, tablefmt="tsv")
+        print(data_base_folder, csv_output)
         with open(os.path.join(data_base_folder, csv_output), "w", encoding="utf-8") as text_file:
             text_file.write(content)
 

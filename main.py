@@ -158,7 +158,7 @@ def run():
 
     # is data on files up to date?
     is_load_data_from_fpl = get_is_get_data()
-    #is_load_data_from_fpl = False
+    #is_load_data_from_fpl = True
 
     print("get_is_get_data is:" + str(get_is_get_data()))
 
@@ -192,5 +192,5 @@ def run():
     print("All Done :)")
 
 if __name__ == '__main__':
-    app.run(degub=True)
+    app.run()
     #run()

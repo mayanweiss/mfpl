@@ -3,12 +3,13 @@
 #from mfplHelpers import latest_stats_games, set_latest_stats_games
 
 # Players' positions for printing
-positions = ("Goalkeeper", "Defender", "Midfielder", "Forward")
+positions = ("Goalkeeper", "Defender", "Midfielder", "Forward", "Manager")
 
 from mfplHelpers import get_gw_to_test, get_latest_stats_games
+import time
 
 class mfplPlayer:
-    def __init__(self, fpl_element, fpl_player, fpl_id, mfpl_data, is_print = False):
+    def __init__(self, fpl_element, fpl_player, fpl_id, mfpl_data, is_print = False, counter = 0):
         # Get player data
         self.fpl_id = fpl_id
         self.fpl_player = fpl_player
@@ -17,6 +18,7 @@ class mfplPlayer:
         self.name = self.fpl_player['second_name']
         self.name += ', ' + self.fpl_player['first_name']
         self.team = mfpl_data.teams[fpl_player['team'] - 1]['name']
+        #print('player:', fpl_player['element_type'], self.name, 'counter:', counter)
         self.position = positions[fpl_player['element_type'] - 1]
         self.cost = fpl_player['now_cost']/10.0
 
@@ -43,8 +45,8 @@ class mfplPlayer:
         # sort the played games
         self.ordered_games_list.reverse()
         if is_print:
-            print('mfpl_player init: ' + str(self.fpl_id) + ' ' + ", Team:" + self.team + '| '+ self.name + "| games:"
-                  + str(len(self.ordered_games)))
+            print(time.strftime("%H:%M:%S"), 'mfpl_player init: ' + str(self.fpl_id) + ' ' + ", Team:" + self.team + '| '+ self.name + 
+                  "| games:" + str(len(self.ordered_games)), 'counter:', counter)
 
         # reset stats
         self.reset_stats()
