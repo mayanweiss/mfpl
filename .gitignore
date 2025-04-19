@@ -8,3 +8,4 @@ data/time.txt
 venv/__pycache__/
 downloaded_data/
 k8s/
+logs/

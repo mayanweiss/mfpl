@@ -1,6 +1,7 @@
 # This is the Mayan FPL data structure
 
 import requests
+from mfpl_web_service import logger
 
 # URL elements
 fpl_base_url = 'https://fantasy.premierleague.com/api/'
@@ -18,7 +19,7 @@ class mfplData:
     # j.keys - dict_keys(['events', 'game_settings', 'phases', 'teams', 'total_players', 'elements', 'element_stats', 'element_types'])
     def mfpl_get_bootstrap_info(self):
         # Get Bootstrap data from FPL website
-        print("Reading new data from FPL")
+        logger.info("Reading new data from FPL")
         r = requests.get(fpl_base_url + fpl_bootstrat_url)
         j = r.json()
 
@@ -45,13 +46,13 @@ class mfplData:
     # Print game week fixtures
     def mfpl_print_gw_fixtures(self, gw):
         # go over all fixtures and find those in this game week
-        print("Game Week:" + str(gw))
+        logger.info("Game Week:" + str(gw))
         for f in self.fixtures:
             if f['event'] == gw:
                 h_team = self.teams[f['team_h'] - 1]['name']
                 a_team = self.teams[f['team_a'] - 1]['name']
-                print(h_team + ' ' + str(f['team_h_score']) + ':' + str(f['team_a_score']) + ' ' + a_team)
-        print("***********************")
+                logger.info(h_team + ' ' + str(f['team_h_score']) + ':' + str(f['team_a_score']) + ' ' + a_team)
+        logger.info("***********************")
 
     # Print all fixtures
     def mfpl_print_all_fixtures(self):
@@ -61,7 +62,7 @@ class mfplData:
     # print teams
     def print_teams(self):
         for team in self.teams:
-            print(str(team['id']) + ': ' + team['name'] + 'PusleId: ' + str(team['pulse_id']))
+            logger.info(str(team['id']) + ': ' + team['name'] + 'PusleId: ' + str(team['pulse_id']))
 
 # team structure:
 # {'code': 3, 'draw': 0, 'form': None, 'id': 1, 'loss': 0, 'name': 'Arsenal', 'played': 0, 'points': 0, 'position': 0,

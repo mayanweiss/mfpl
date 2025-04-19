@@ -12,17 +12,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create necessary directories and initialize data
-RUN mkdir -p data venv && \
+RUN mkdir -p data venv logs && \
     touch data/time.txt && \
     echo "Thu Mar 13 00:00:00 2025" > data/time.txt
 
 # Set environment variables
-ENV FLASK_APP=web_service.py
+ENV FLASK_APP=mfpl_web_service.py
 ENV FLASK_ENV=production
+ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
 # Expose the port the app runs on
 EXPOSE 5000
 
 # Command to run the application
-#CMD ["gunicorn", "--bind", "0.0.0.0:5000", "web_service:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "mfpl_web_service:app"]

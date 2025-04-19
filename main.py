@@ -1,4 +1,5 @@
 # this is the main running code for Mayan's Fantasy Premier League (mfpl) code
+import os
 import sys
 sys.path.append(".")
 
@@ -18,6 +19,7 @@ from venv.forms import HeaderForm
 from mfplHelpers import data_base_folder, bootstrap_data_file, time_file, players_data_file, teams_data_file
 
 from venv.mfplTeams import mfplTeams
+from mfplHelpers import logger
 
 # Flask configurations
 app = Flask(__name__)
@@ -28,7 +30,7 @@ app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 
 # decides if we should load new data from website based on checking if this is a new day
 def is_load_data_from_fpl_():
-    # print(data_base_folder + time_file)
+    # logger.info(data_base_folder + time_file)
     time_f = os.path.join(data_base_folder, time_file)
     # read time of last get from fpl website
     try:
@@ -37,7 +39,7 @@ def is_load_data_from_fpl_():
         f = open(time_f, 'x')
         f = open(time_f, 'r')
     time_string = f.readline()
-    print('Last data retrieving time from FPL:' + time_string)
+    logger.info('Last data retrieving time from FPL:' + time_string)
     # convert string to time
     try:
         previous_time = time.strptime(time_string, "%a %b %d %H:%M:%S %Y")
@@ -47,7 +49,7 @@ def is_load_data_from_fpl_():
 
     # Get current time
     current_time = time.localtime()
-    print('Current time:' + time.asctime(current_time))
+    logger.info('Current time:' + time.asctime(current_time))
 
     # if same day of month, don't retrieve data
     if previous_time[2] == current_time[2]:
@@ -68,14 +70,14 @@ def load_fpl_bootstrap_data(load_data_from_fpl, force_update=False):
     # Do we need to load data from FPL website?
     if load_data_from_fpl or force_update:
         # Retrieve bootstrap and fixtures data from FPL website
-        print("Retrieving bootstrap and fixtures data from FPL website")
+        logger.info("Retrieving bootstrap and fixtures data from FPL website")
         mfd.mfpl_get_bootstrap_info()
         mfd.mfpl_get_fixtures_info()
         # write bootstrap and fixtures data to file
         replace_data_on_file(mfd, data_base_folder + bootstrap_data_file)
     else:
         # Read data from file
-        print("Loading bootstrap and fixtures from data file")
+        logger.info("Loading bootstrap and fixtures from data file")
         mfd = get_data_from_file(data_base_folder + bootstrap_data_file)
 
     return mfd
@@ -89,13 +91,13 @@ def load_fpl_players_data(load_data_from_fpl, mfd, force_update=False):
     # Do we need to load data from FPL website?
     if load_data_from_fpl or force_update:
         # Retrieve players data from FPL website
-        print("Retrieving players data from FPL website")
+        logger.info("Retrieving players data from FPL website")
         players.get_players_data(mfd)
         # write players data to file
         replace_data_on_file(players, data_base_folder + players_data_file)
     else:
         # Read data from file
-        print("Loading players from data file")
+        logger.info("Loading players from data file")
         players = get_data_from_file(data_base_folder + players_data_file)
 
     return players
@@ -114,39 +116,39 @@ def get_fpl_teams_data(mfd):
 
 # overwrite data file
 def replace_data_on_file(obj, filename):
-    print("replacing pkl file:" + filename)
+    logger.info("replacing pkl file:" + filename)
     with open(filename, 'wb') as outp:  # Overwrites any existing file.
         pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
 
 
 # load data from file
 def get_data_from_file(filename):
-    print("loading pkl file:" + filename)
+    logger.info("loading pkl file:" + filename)
     with open(filename, 'rb') as inp:
         return pickle.load(inp)
 
 
 def readForm(form):
     try:
-        print("Setting latest_stats_games to " + str(form.lookback.data))
+        logger.info("Setting latest_stats_games to " + str(form.lookback.data))
         set_latest_stats_games(form.lookback.data)
-        print("Set latest_stats_games to " + str(get_latest_stats_games()))
+        logger.info("Set latest_stats_games to " + str(get_latest_stats_games()))
     except ValueError:
-        print("Setting latest_stats_games to default 4")
+        logger.info("Setting latest_stats_games to default 4")
 
     try:
-        print("Setting gw_to_test to " + str(form.round.data))
+        logger.info("Setting gw_to_test to " + str(form.round.data))
         set_gw_to_test(form.round.data)
-        print("Set gw_to_test to " + str(get_gw_to_test()))
+        logger.info("Set gw_to_test to " + str(get_gw_to_test()))
     except ValueError:
-        print("Setting gw_to_test to default 12")
+        logger.info("Setting gw_to_test to default 12")
 
     try:
-        print("Setting is_get_data to " + str(form.isGetData.data))
+        logger.info("Setting is_get_data to " + str(form.isGetData.data))
         set_is_get_data(form.isGetData.data)
-        print("Set is_get_data to " + str(get_is_get_data()))
+        logger.info("Set is_get_data to " + str(get_is_get_data()))
     except ValueError:
-        print("Setting is_get_data to default False")
+        logger.info("Setting is_get_data to default False")
 
 
 @app.route("/home", methods=['GET', 'POST'])
@@ -160,7 +162,7 @@ def run():
     is_load_data_from_fpl = get_is_get_data()
     #is_load_data_from_fpl = True
 
-    print("get_is_get_data is:" + str(get_is_get_data()))
+    logger.info("get_is_get_data is:" + str(get_is_get_data()))
 
     # get all data loaded to objects
     mfd = load_fpl_bootstrap_data(is_load_data_from_fpl)
@@ -184,12 +186,12 @@ def run():
 
     #tables.append(players.print_top_players_bonus_and_bps_trend(gw_to_test))
 
-    print("is_load_data_from_fpl:" + str(is_load_data_from_fpl))
+    logger.info("is_load_data_from_fpl:" + str(is_load_data_from_fpl))
     form.isGetData.data = False
     return unescape(render_template('homepage.html', tables=tables, form=form, round = get_gw_to_test(), lookback = get_latest_stats_games() ))
 
     # Done
-    print("All Done :)")
+    logger.info("All Done :)")
 
 if __name__ == '__main__':
     app.run()

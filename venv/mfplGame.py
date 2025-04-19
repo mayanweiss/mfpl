@@ -1,4 +1,5 @@
 # This is the Mayan's FPL Game data structure
+from mfpl_web_service import logger
 
 # Fixture structure:
 # {'code': 2292838, 'event': 3, 'finished': True, 'finished_provisional': True, 'id': 29, 'kickoff_time': '2022-08-20T11:30:00Z',
@@ -98,61 +99,62 @@ class mfplGame:
             if fpl_id == self.team_a_id:
                 team = 'a'
             else:
-                print("get_game_points: wrong team id:" + str(fpl_id) + "home team:" + str(team_h_id) + "away team:" + str(team_a_id))
+                logger.info("get_game_points: wrong team id:" + str(fpl_id) + "home team:" + 
+                            str(self.team_h_id) + "away team:" + str(self.team_a_id))
                 return 0
 
         # start calculating point for the team
         points = 0
 
-#        print("get_game_points - home team:" + str(self.team_h_id) + " away team:" + str(self.team_a_id)
+#        logger.info("get_game_points - home team:" + str(self.team_h_id) + " away team:" + str(self.team_a_id)
 #              + " round:" + str(self.round))
 
         # Gaols - 4 points per goal
         # TODO: update based on player position
         for content in self.fixture['stats'][0][team]:
             points += content['value']*4
-#        print("  Goals - point:" + str(points))
+#        logger.info("  Goals - point:" + str(points))
 
         # Assists - 3 points per goal
         # TODO: update based on player position
         for content in self.fixture['stats'][1][team]:
             points += content['value']*3
-#        print("  Assists - point:" + str(points))
+#        logger.info("  Assists - point:" + str(points))
 
         # Own Goals - -2 points per goal
         for content in self.fixture['stats'][2][team]:
             points += content['value']*-2
-#        print("  Own Goals - point:" + str(points))
+#        logger.info("  Own Goals - point:" + str(points))
 
         # Penalties Saved - 3 points per save
         for content in self.fixture['stats'][3][team]:
             points += content['value']*3
-#        print("  Penalties Saved - point:" + str(points))
+#        logger.info("  Penalties Saved - point:" + str(points))
 
         # Penalties Missed - -2 points per miss
         for content in self.fixture['stats'][4][team]:
             points += content['value']*-2
-#        print("  Penalties Missed - point:" + str(points))
+#        logger.info("  Penalties Missed - point:" + str(points))
 
         # Yellow Cards - -1 points per card
         for content in self.fixture['stats'][5][team]:
             points += content['value']*-1
-#        print("  Yellow Cards - point:" + str(points))
+#        logger.info("  Yellow Cards - point:" + str(points))
 
         # Red Cards - -2 points per card
         for content in self.fixture['stats'][6][team]:
             points += content['value']*-2
-#        print("  Red Cards - point:" + str(points))
+#        logger.info("  Red Cards - point:" + str(points))
 
         # Saves - point per 3 saves
         for content in self.fixture['stats'][1][team]:
             points += int(round(content['value']/3))
-#        print("  Saves - point:" + str(points))
+#        logger.info("  Saves - point:" + str(points))
 
         # Bonus - bonus point as is
         for content in self.fixture['stats'][1][team]:
             points += content['value']
-#        print("  Bonus - point:" + str(points))
+#        logger.info("  Bonus - point:" + str(points))
 
         return points
 
@@ -163,7 +165,7 @@ class mfplGame:
             if fpl_id == self.team_a_id:
                 return self.team_a_score
             else:
-                print("get_game_goals_scored: wrong team id:" + str(fpl_id) + "home team:" + str(team_h_id) + "away team:" + str(team_a_id))
+                logger.info(f"get_game_goals_scored: wrong team id: {fpl_id} home team: {self.team_h_id} away team: {self.team_a_id}")
                 return 0
 
     def get_home_game_goals_scored(self, fpl_id):
@@ -185,8 +187,7 @@ class mfplGame:
             if fpl_id == self.team_h_id:
                 return self.team_a_score
             else:
-                print("get_game_goals_conceded: wrong team id:" + str(fpl_id) + "home team:" + str(
-                    team_h_id) + "away team:" + str(team_a_id))
+                logger.info(f"get_game_goals_conceded: wrong team id: {fpl_id} home team: {self.team_h_id} away team: {self.team_a_id}")
                 return 0
 
     def get_home_game_goals_conceded(self, fpl_id):

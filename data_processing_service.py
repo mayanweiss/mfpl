@@ -1,11 +1,6 @@
 # data_processing_service.py
 import venv.mfplPlayer as mfplPlayer
-from venv.mfplTeams import mfplTeams
 
-def get_fpl_teams_data(mfd):
-    teams = mfplTeams()
-    teams.get_teams_data(mfd)
-    return teams
 
 def process_data(mfd, players, teams):
     tables = []

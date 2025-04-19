@@ -6,6 +6,8 @@ from tabulate import tabulate
 import time
 import os
 from mfplHelpers import data_base_folder, csv_output, improvement_csv_output, get_latest_stats_games
+from mfpl_web_service import logger
+
 # Files location and names
 #data_base_folder = '/Users/mayan/PycharmProjects/mfpl/data/'
 #bootstrap_data_file = 'outputTable.csv'
@@ -23,7 +25,7 @@ class mfplPlayers:
         self.players_stats = {}
 
     # Get every player data from FPL website
-    def get_players_data(self, mfpl_data):
+    def get_players_data(self, mfpl_data, is_sleep=True):
         counter = 0
         for fpl_player in mfpl_data.players:
             # build player's url
@@ -36,17 +38,17 @@ class mfplPlayers:
                 r = requests.get(player_url)
                 fpl_element = r.json()
             except Exception as e:
-                print('get_players_data exception caught:' + str(e))
+                logger.info(f'get_players_data exception caught: {str(e)}')
                 time.sleep(60)
             counter += 1
-            if counter % 5 == 0:
-                print('sleeping for 10 seconds, counter:', counter)
+            if counter % 5 == 0 and is_sleep:
+                logger.info(f'sleeping for 10 seconds, counter: {counter}')
                 time.sleep(10)
 
             # Create player data structure and save to dic (key is player ID)
             self.players_stats[player_id] = mfplPlayer(fpl_element, fpl_player, player_id, mfpl_data, 
                                                        is_print = True, counter = counter)
-            #count += 1
+
             #if count > 9:
             #    time.sleep(10)
             #    count = 0
@@ -55,7 +57,7 @@ class mfplPlayers:
     # find all players with leading bsp before a game week and print their aggregated bps of the last
     #  <latest_stats_games> games before and teh gw points
     def print_top_latest_bps_players_on_gw(self, gw):
-        print('********** Calculating players latest bps for GW:' + str(gw) + '| # of players:' + str(len(self.players_stats)) + ' ********')
+        logger.info(f'********** Calculating players latest bps for GW: {gw} | # of players: {len(self.players_stats)} ********')
 
         table = []
         self.add_player_print_table_header(table)
@@ -67,9 +69,8 @@ class mfplPlayers:
                 #player.print_player_stats()
                 player.add_player_to_print_table(table)
 
-        print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
-        print("table size:", len(table)-1)
-
+        #logger.info(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+        logger.info(f"table size: {len(table)-1}")
 
         return tabulate(table, headers='firstrow', tablefmt='html')
 
@@ -80,7 +81,7 @@ class mfplPlayers:
 
     # find all players with more than 6 points in a game week, and print their stats leading to this gw
     def print_top_players_by_point_on_gw(self, gw):
-        print('********** top players by points for GW:' + str(gw) + ' ******************')
+        logger.info(f'********** top players by points for GW: {gw} ******************')
 
         table = []
         self.add_player_print_table_header(table)
@@ -92,15 +93,15 @@ class mfplPlayers:
                 #player.print_player_stats()
                 player.add_player_to_print_table(table)
 
-        print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
-        print("table size:", len(table)-1)
+        #logger.info(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+        logger.info(f"table size: {len(table)-1}")
 
         return tabulate(table, headers='firstrow', tablefmt='html')
 
 
 
     def print_top_players_bonus_and_bps_trend(self, gw):
-        print('********** top players bonus and bps trend for GW:' + str(gw) + ' ******************')
+        logger.info(f'********** top players bonus and bps trend for GW: {gw} ******************')
 
         table = []
         self.add_player_bonus_trend_print_table_header(table)
@@ -112,8 +113,8 @@ class mfplPlayers:
                 # player.print_player_stats()
                 player.add_player_to_trend_print_table(table)
 
-        print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
-        print("table size:", len(table) - 1)
+        logger.info(f"{tabulate(table, headers='firstrow', tablefmt='csv')}")
+        logger.info(f"table size: {len(table)-1}")
 
         return tabulate(table, headers='firstrow', tablefmt='html')
 
@@ -132,7 +133,7 @@ class mfplPlayers:
 
 
     def print_top_players_per_game_per_cost(self, gw):
-        print('********** top players bonus and bps trend for GW:' + str(gw) + ' ******************')
+        logger.info(f'********** top players bonus and bps trend for GW: {gw} ******************')
 
         table = []
 #        count = 0
@@ -150,7 +151,6 @@ class mfplPlayers:
         table = sorted(sorted(sorted(table, key=lambda x: float(x[4]), reverse=True), key=lambda x: float(x[6]), reverse=True),
                        key=lambda x: str(x[2]), reverse=True)
 
-
         self.add_player_per_game_per_cost_print_table_header(table)
 
         # write table to csv file
@@ -164,8 +164,8 @@ class mfplPlayers:
 
 
         #print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
-        print(tabulate(table, headers='firstrow', tablefmt='csv'))
-        print("table size:", len(table) - 1)
+        #logger.info(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+        logger.info(f"table size: {len(table)-1}")
 
         return tabulate(table, headers='firstrow', tablefmt='html')
 
@@ -176,13 +176,13 @@ class mfplPlayers:
 
 
     def improving_players_table(self, gw):
-        print('********** Improving players trend for GW:' + str(gw) + ' ******************')
+        logger.info(f'********** Improving players trend for GW: {gw} ******************')
 
         table = []
 #        count= 0
 
         if gw < 5:
-            print('GW too early for improvement insights')
+            logger.info('GW too early for improvement insights')
 
         # add to table each player that latest points per game per cost are high or have high latest points
         for player in self.players_stats.values():
@@ -199,22 +199,21 @@ class mfplPlayers:
         table = sorted(sorted(sorted(table, key=lambda x: float(x[4]), reverse=True), key=lambda x: float(x[6]), reverse=True),
                        key=lambda x: str(x[2]), reverse=True)
 
-
         self.add_improving_players_table_header(table)
 
         # write table to csv file
-        content = tabulate(table, tablefmt="tsv")
-        print(data_base_folder, csv_output)
-        with open(os.path.join(data_base_folder, csv_output), "w", encoding="utf-8") as text_file:
-            text_file.write(content)
+        #content = tabulate(table, tablefmt="tsv")
+        #logger.info(f"data_base_folder: {data_base_folder}, csv_output: {csv_output}")
+        #with open(os.path.join(data_base_folder, csv_output), "w", encoding="utf-8") as text_file:
+        #    text_file.write(content)
 
         #        text_file = open(os.path.join(data_base_folder, improvement_csv_output), "w")
         #        text_file.write(content)
-        text_file.close()
+        #text_file.close()
 
-        # print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
-        print(tabulate(table, headers='firstrow', tablefmt='csv'))
-        print("table size:", len(table) - 1)
+        # print(tabulate(table, headers='firstrow', tablefmt='fancy_grid')) 
+        logger.info(f"{str(tabulate(table, headers='firstrow', tablefmt='csv')).encode('utf-8')}")
+        logger.info(f"table size: {len(table)-1}")
 
         return tabulate(table, headers='firstrow', tablefmt='html')
 

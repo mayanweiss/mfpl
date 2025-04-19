@@ -1,6 +1,8 @@
 # This is the Mayan's FPL Player data structure
 
 #from mfplHelpers import latest_stats_games, set_latest_stats_games
+from mfpl_web_service import logger
+
 
 # Players' positions for printing
 positions = ("Goalkeeper", "Defender", "Midfielder", "Forward", "Manager")
@@ -18,11 +20,11 @@ class mfplPlayer:
         self.name = self.fpl_player['second_name']
         self.name += ', ' + self.fpl_player['first_name']
         self.team = mfpl_data.teams[fpl_player['team'] - 1]['name']
-        #print('player:', fpl_player['element_type'], self.name, 'counter:', counter)
+        #logger.info(f'player: {fpl_player["element_type"]} {self.name} counter: {counter}')
         self.position = positions[fpl_player['element_type'] - 1]
         self.cost = fpl_player['now_cost']/10.0
 
-        #print ('initing ' + self.team + '/'s ' + self.name)
+        #logger.info(f'initing {self.team}:"'s" :{self.name}')
 
         # Reset Player fields
         self.total_played_min = None
@@ -45,8 +47,7 @@ class mfplPlayer:
         # sort the played games
         self.ordered_games_list.reverse()
         if is_print:
-            print(time.strftime("%H:%M:%S"), 'mfpl_player init: ' + str(self.fpl_id) + ' ' + ", Team:" + self.team + '| '+ self.name + 
-                  "| games:" + str(len(self.ordered_games)), 'counter:', counter)
+            logger.info(f"{time.strftime('%H:%M:%S')} mfpl_player init: {self.fpl_id}, Team: {self.team} | {self.name} | games: {len(self.ordered_games)}, counter: {counter}")
 
         # reset stats
         self.reset_stats()
@@ -67,7 +68,7 @@ class mfplPlayer:
     # Generic game info extraction
     #   info - string of name of FPL data
     def get_game_info(self, info, game, gw):
-        #print('getting: ' + str(gw) + ' ' + info + " " + str(game[info]))
+        #logger.info('getting: ' + str(gw) + ' ' + info + " " + str(game[info]))
         return game[info]
 
     # calc latest stats before a given GW
@@ -86,38 +87,46 @@ class mfplPlayer:
             # go over the last <latest_stats_games> team games before the relevant game we're checking
             for i in range(games_range):
                 # find next gw to collect stats from
-                gw_id = self.ordered_games_list[index]
-#                print("get_latest_info retrieving:" + self.name + ':' + info + ' gw:' + str(gw_id) +
-#                      ', index:' + str(index) + " " + str(i) + " " + str(games_range))
+                gw_id = self.ordered_games_list[index-1]
+                if gw_id in self.ordered_games:
+                    val += float(self.get_game_info(info, self.ordered_games[gw_id], gw_id))
+                #else:
+                #    print("get_latest_info no play time retrieving:", str(self.name), ':' , info ,':' , "GW_id:" , str(gw_id),
+                #          ' Index:' , str(index) , ' Games range:', str(games_range) , ' val:' , str(val))
+                #logger.info(f"get_latest_info retrieving: {self.name}: {info}: GW_id: {gw_id}: Index: {index}: Games range: {games_range}: val: {val}")
+                #print("get_latest_info retrieving:", str(self.name), ':' , info ,':' , "GW_id:" , str(gw_id),
+                #       ' Index:' , str(index) , ' Games range:', str(games_range) , ' val:' , str(val))
                 # add this gw value to returned value
-                val += float(self.get_game_info(info, self.ordered_games[gw_id], gw_id))
                 index = index + 1
 
         except Exception as e:
-            #print("get_latest_info exception: " + self.name + ': ' + str(index) + ':' + str(gw_id) + ':' + str(val) + ':' + str(
-            #    len(self.ordered_games)) + ' exception: ' + str(e))
+            #logger.error(f"get_latest_info exception: {self.name}: {index}: {gw_id}: {val}: {games_range}: {len(self.ordered_games)} exception: {str(e)}")
             e
+            #print("get_latest_info exception:", str(self.name), ':' , index ,':' , "GW_id:" , str(gw_id),
+                  #' val:' , str(val) , ' Games range:', str(games_range) , ' len(self.ordered_games):' , str(len(self.ordered_games)) , ' exception:' , str(e))
+
 
         return val
 
     def get_latest_info_table(self, info, index):
         # reset return value
         t_val = []
-        #print("get_latest_info_table " + info)
+        #logger.info("get_latest_info_table " + info)
 
         try:
             # go over the last <latest_stats_games> team games before the relevant game we're checking
             for i in range(get_latest_stats_games()):
                 # find next gw to collect stats from
                 gw_id = self.ordered_games_list[index]
-                #print("get_latest_info retrieving:" + self.name + ':' + info + ' gw:' + str(gw_id) + ', index:' + str(index) + " " + str(latest_stats_games) + " " + str(float(self.get_game_info(info, self.ordered_games[gw_id], gw_id))))
+                #logger.info("get_latest_info retrieving:" + self.name + ':' + info + ' gw:' + str(gw_id) + ', index:' + str(index) + " " + str(latest_stats_games) + " " + str(float(self.get_game_info(info, self.ordered_games[gw_id], gw_id))))
                 # add this gw value to returned value
                 t_val.append(float(self.get_game_info(info, self.ordered_games[gw_id], gw_id)))
                 index = index + 1
 
         except Exception as e:
-            #print("get_latest_info exception: " + self.name + ': ' + str(index) + ':' + str(gw_id) + ':' + str(val) + ':' + str(
+            #logger.info("get_latest_info_table exception: " + self.name + ': ' + str(index) + ':' + str(gw_id) + ':' + str(val) + ':' + str(
             #    len(self.ordered_games)) + ' exception: ' + str(e))
+            #print("get_latest_info_table exception: " + self.name + ': ' + str(index) + ':' + str(gw_id) + ':' ' exception: ' + str(e))
             e
 
         return t_val
@@ -178,10 +187,7 @@ class mfplPlayer:
 
     # prints player and stats
     def print_player_stats(self):
-        print(self.team + ': ' + self.name + ': ' + self.position + ' ' + ': ' +
-              'Points:' + str(self.total_points) + ' Minutes: ' + str(self.total_played_min) + ' latest bsp: ' + str(
-            self.latest_bps) + ' latest ict: ' + str(self.latest_ict_index) + ' latest points:' + str(self.latest_points) +
-              ' Last game points:' + str(self.latest_game_gw_points))
+        logger.info(f"{self.team}: {self.name}: {self.position}: Points: {self.total_points} Minutes: {self.total_played_min} latest bsp: {self.latest_bps} latest ict: {self.latest_ict_index} latest points: {self.latest_points} Last game points: {self.latest_game_gw_points}")
 
     # prints player and stats
     def get_player_stats_row(self):
@@ -192,12 +198,12 @@ class mfplPlayer:
         weighted_points = 0
         multiplier = 1
 
-        #print (str(self.latest_points_table))
+        #logger.info (str(self.latest_points_table))
         for p in self.latest_points_table:
             weighted_points +=  p*multiplier
             multiplier *= 0.8
 
-        #print (str(self.latest_points_table) + ', ' + str(weighted_points))
+        #logger.info (str(self.latest_points_table) + ', ' + str(weighted_points))
 
         return weighted_points
 
@@ -210,14 +216,14 @@ class mfplPlayer:
 
         # find index of the gw (or the week before in case the team didn't play in this gw)
         for i in range(len(self.ordered_games_list)):
-            #print(str(self.ordered_games_list[i - 1] )+ ':' + str(index) + ':' + str(i))
+            #logger.info(str(self.ordered_games_list[i - 1] )+ ':' + str(index) + ':' + str(i))
             if self.ordered_games_list[i] <= gwToWatch:
                 index = i
-                #print('2: ' + str(self.ordered_games_list[i]) + ':' + str(gwToWatch) + ':' + str(i)+ ':' + str(self.ordered_games_list))
+                #logger.info(self.name + str(self.ordered_games_list[i]) + ':' + str(gwToWatch) + ':' + str(index)+ ':' + str(self.ordered_games_list))
                 break
         # if no GW found just return 0's (cloud happen when player joined the team after this GW)
         if index == -1:
-            #print("gw wasn't found:", str(gwToWatch) + '|' + str(self.ordered_games_list))
+            #logger.info("gw wasn't found:", str(gwToWatch) + '|' + str(self.ordered_games_list))
             self.latest_points = 0
             self.latest_points_p_game_p_cost = 0.0
             self.latest_goals = 0
@@ -250,7 +256,7 @@ class mfplPlayer:
             self.latest_weighted_points = self.calc_latest_weighted_points()
             self.latest_weighted_points_p_game_p_cost = self.latest_weighted_points/get_latest_stats_games()/self.cost
             self.latest_improved_stats = self.calc_improvement_stats(index)
-#            print(self.team + ', ' + self.name + ', latest_improved_stats:' + str(self.latest_improved_stats))
+#            logger.info(self.team + ', ' + self.name + ', latest_improved_stats:' + str(self.latest_improved_stats))
 
 
     # Points improvement over the last 2 GW (vs. the previous 2 GW)
@@ -258,7 +264,7 @@ class mfplPlayer:
         last_2_weeks_points = self.get_latest_info('total_points', index, 2)
         last_4_weeks_points = self.get_latest_info('total_points', index, 4)
 
-#        print(self.team + ', ' + self.name + ', last_2_weeks_points:' + str(last_2_weeks_points) + ', last_4_weeks_points', str(last_4_weeks_points))
+#        logger.info(self.team + ', ' + self.name + ', last_2_weeks_points:' + str(last_2_weeks_points) + ', last_4_weeks_points', str(last_4_weeks_points))
 
         return last_2_weeks_points - (last_4_weeks_points - last_2_weeks_points)
 
